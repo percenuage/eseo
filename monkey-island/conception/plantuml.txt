@@ -1,0 +1,248 @@
+title diagramme UML du jeu monkey Island 
+
+Class MonkeyIsland{
+{static} + RessourceBundle : CONFIGURATION
+{static} + Integer : PORT
+{static} + Island : island
+{static} + Map[] : coms
+}
+
+package fr.eseo.game.command{
+MonkeyIsland "1" *-- Command
+
+enum CommandEnum{
+  CRAZY_MONKEYS
+HUNTER_MONKEYS
+CORRECT_MOVE
+INCORRECT_MOVE
+ISLAND
+MOVE_PIRATE_CLIENT
+MOVE_PIRATE_SERVER
+NEW_GAME
+NEW_PIRATE_CLIENT
+NEW_PIRATE_SERVER
+PIRATE
+PIRATES
+REMOVE_PIRATE
+RHUM
+RHUMS
+TREASURE
+
+}
+}
+class Command{
+- CommandEnum : commandEnum
+- List[] : values
+- void fillValues(String[] list)
++ CommandEnum getCommandEnum()
++ List[] getValues()
+}
+
+package fr.eseo.game.network{
+MonkeyIsland "1" *-- "*" Client 
+Client -- Communication
+}
+
+class Communication{
+{static} + CommandEnum pendingCommand = null
+
+- Socket : socket
+- PrintWriter : out
+- BufferedReader : in
++ void sendMessage(String message)
++ void sendMessage(CommandEnum commandEnum, String values)
++ void sendMessage(CommandEnum commandEnum, Collection[] list)
++ String ReceiveMessage()
++ void close()
+-String getStringFromList(Collection[] list)
++ Integer getPort()
++ Socket getSocket()
++ String toString()
+}
+class Client{
+- Communication : com
+- StringBuilder : messages
++ Client (Socket socket)
++ String toString()
++ void run()
+- void switchCommand(Command command)
+- void onConnection()
+- void onInscription(Pirate pirate)
+- void onDisconnection()
+
+}
+package fr.eseo.model {
+
+MonkeyIsland "1" *-- "*"Island
+
+Island "1" *-- "*"Cell
+Observable <|-- Island
+Cell "1" *--"0..1"Element
+Cell "1" *-- "0..1"Character
+Element <|-- Rhum
+Element <|-- Treasure
+Character <|-- Pirate
+Observer <|-- Pirate
+Character <|-- Monkey
+Monkey <|-- CrazyMonkey
+Monkey <|-- HunterMonkey
+}
+
+class Island{
+- Integer : Rows
+- Integer : columns
+- Treasure : treasure
+- Cell[] : cells
+- Monkey[] : crazyMonkeys
+- Monkey[] : hunterMonkeys
+- Rhum[] : rhums
+- Map[] : pirates
+
+{static} + island getInstance()
++ Cell getCell(Integer row, Integer column)
++ Cell getRandomAdjacentCell(Cell cell)
++ void initializeIsland()
++ Pirate addPirate(Integer id)
++ void removePirate(Integer id)
++ Pirate movePirate(Integer id, Integer moveX, Integer moveY)
++ String toString()
++ Cell getRandomVoidEarthCell()
++ void intializeCells()
++ void intializeTreasure()
+- void initializeCrazyMonkeys()
+- void initializeHunterMonkeys()
+- void initializeRhums()
++ Integer getRows()
++ Integer getColumns()
++ List[] getCells()
++ Treasure getTreasure()
++ void setTreasure(Treasure treasure)
++ Map[] getPirates()
++ void setPirates(Map[] pirates)
++ List[] getCrazyMonkeys()
++ void setCrazyMonkeys(List crazyMonkeys)
++ List[] getHunterMonkeys()
++ void setHunterMonkeys(List[] hunterMonkeys)
++ List[] getRhums()
++ void setRhums(List[] rhums)
++ void notifyClients(CommandEnum commandEnum, Object arg)
++ void newGame()
+
+
+
+
+}
+
+class Cell{
+-Integer : row
+-Integer : column
+-Integer : type
+-Character : character
+-Element : element
+-Island : island
+{static}+ Integer : WATER = 0
+{static}+ Integer : EARTH = 1
+
++ Boolean canAccess()
++ Integer getRow()
++ void setRow(Integer row)
++ Integer getColumn()
++ void setColumn(Integer column)
++ Integer getType()
++ void setType(Integer type)
++ Character getCharacter()
++ void setCharacter(Character character)
++ Element getElement()
++ void setElement(Element element)
++ Island getIsland()
++ void setIsland(Island island)
+}
+
+abstract Element{
+- Boolean : hidden
+- Boolean : found
+- Cell : cell
+
++ Integer getVisibility()
++ Boolean isHidden()
++ void setHidden(Boolean hidden)
++ Boolean isFound()
++ void setFound(Boolean found)
++ Cell getCell()
++ void setCell(Cell cell)
+
+}
+
+interface Character{
+Boolean canMove(Cell cell)
+void moveTo(Cell cell)
+void meetCharacter(Character character)
+}
+
+class Rhum{
+-Integer : id
+{static} + Integer : REAPPEAR_TIME
+{static} + Integer : ENERGY_RECOVER
++ String toString()
++ String toStringWithId()
++ Integer getId()
++ void setId(Integer id)
+}
+
+class Treasure{
++ String toString()
+}
+
+class Pirate{
+- Cell : cell
+- Integer : id
+- Integer : energy
+{static} + Integer MIN_ENERGY
+{static} + INteger MAX_ENERGY
++ Boolean isDead()
++ void foundElement(Element element)
++ Boolean canMove(Cell cell)
++ void moveTo(Cell cell)
++ void meetCharacter(Character character)
++ void update(Observable o, Object arg)
++ String toString()
++ string toStringWithEnergy()
++ string toStringWithEnergyAndId()
++ Cell getCell()
++ void setCell(Cell cell)
++ Integer getEnergy()
++ void setEnergy(Integer energy)
++ Integer getId()
++ setId(Integer id)
+}
+
+class Monkey{
+- Cell : cell
+- Integer : speed
++ Boolean canMove(Cell cell)
++ void moveTo(Cell cell)
++ void meetCharacter(Character character)
++ String tostring()
++ cell getCell()
++ void setCell(Cell cell)
++ Integer getSpeed()
++ void setSpeed(Integer speed)
+
+}
+
+class CrazyMonkey{
+{static}+ Integer : SPEED
++ void run()
+}
+
+class HunterMonkey{
+- Pirate : target
+{static} + Integer : SPEED
+
++ void run()
+- Cell getCellToTarget()
+- Pirate getCloserTarget()
+- Integer getDistance(Pirate pirate)
++ Pirate getTarget()
++ void setTarget(Pirate target)
+}
